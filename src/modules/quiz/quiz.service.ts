@@ -7,15 +7,23 @@ import { CreateQuizDto } from './dto/createQuiz.dto';
 @Injectable()
 export class QuizService {
   constructor(
-    @InjectRepository(QuizRepository) private quizRepository:QuizRepository
-  ){}
+    @InjectRepository(QuizRepository) private quizRepository: QuizRepository,
+  ) {}
 
-  getAllQuiz() {
-    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  async getAllQuiz() {
+    const quizes = await this.quizRepository.find()
+    return quizes;
   }
 
-  async createNewQuiz(quiz : CreateQuizDto){
-    return await this.quizRepository.save(quiz)
+  async getQuizById(id: number): Promise<Quiz> {
+    const quiz = await this.quizRepository.findOne({ where: { id } });
+    if (!quiz) {
+      throw new Error(`Quiz with id ${id} not found`);
+    }
+    return quiz;
+  }
+
+  async createNewQuiz(quiz: CreateQuizDto) {
+    return await this.quizRepository.save(quiz);
   }
 }
-
