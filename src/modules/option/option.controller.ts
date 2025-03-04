@@ -7,10 +7,13 @@ import {
   UsePipes,
   ValidationPipe,
   NotFoundException,
+  Put,
+  Param,
 } from '@nestjs/common';
 import { OptionService } from './option.service';
 import { createOptionDto } from './dto/createOption.dto';
 import { QuestionService } from '../question/question.service';
+import { QuestionRepository } from '../question/question.repository';
 
 @Controller('option')
 export class OptionController {
@@ -41,6 +44,28 @@ export class OptionController {
     return await this.optionService.createOption(
       request.text,
       question,
+      request.isCorrect,
+    );
+  }
+
+  @Put('/:id')
+  @UsePipes(ValidationPipe)
+  async UpdateOptionById(
+    @Body() request: createOptionDto,
+    @Param('id') optionId: number,
+  ) {
+    const question = await this.questionService.getQuestionById(
+      request.questionId,
+    );
+    if (!question) {
+      throw new NotFoundException(
+        `Question with ID ${request.questionId} not found`,
+      );
+    }
+
+    return await this.optionService.UpdateOptionById(
+      optionId,
+      request.text,
       request.isCorrect,
     );
   }

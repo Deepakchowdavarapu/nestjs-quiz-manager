@@ -13,7 +13,10 @@ export class QuestionService {
   ) {}
 
   async getAllQuestions() {
-    return await this.questionRepository.find();
+    return await this.questionRepository
+      .createQueryBuilder('qt')
+      .leftJoinAndSelect('qt.options', 'o', 'qt.id = o.questionId')
+      .getMany()
   }
 
   async getQuestionById(id: number) {

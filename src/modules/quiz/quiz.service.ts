@@ -10,9 +10,14 @@ export class QuizService {
     @InjectRepository(QuizRepository) private quizRepository: QuizRepository,
   ) {}
 
-  async getAllQuiz() {
-    const quizes = await this.quizRepository.find()
-    return quizes;
+  async getAllQuiz(): Promise<[Quiz[], number]> {
+    const quizzes = await this.quizRepository
+      .createQueryBuilder('q')
+      .leftJoinAndSelect('q.questions', 'qt', 'q.id = qt.quizId')
+      .leftJoinAndSelect('qt.options', 'o')
+      .getManyAndCount();
+    return quizzes;
+    // return await this.quizRepository.find()
   }
 
   async getQuizById(id: number): Promise<Quiz> {
