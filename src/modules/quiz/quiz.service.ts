@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuizRepository } from './quiz.repository';
 import { Quiz } from './quiz.entity';
@@ -21,11 +21,18 @@ export class QuizService {
   }
 
   async getQuizById(id: number): Promise<Quiz> {
-    const quiz = await this.quizRepository.findOne({ where: { id } });
-    if (!quiz) {
-      throw new Error(`Quiz with id ${id} not found`);
+    const fullQuiz = await this.quizRepository
+      .createQueryBuilder('q')
+      .where('q.id = :id', { id })
+      .leftJoinAndSelect('q.questions', 'qt', 'q.id = qt.quizId')
+      .leftJoinAndSelect('qt.options', 'o')
+      .getOne();
+
+    if (!fullQuiz) {
+      throw new BadRequestException(`Quiz with id ${id} not found`);
     }
-    return quiz;
+
+    return fullQuiz;
   }
 
   async createNewQuiz(quiz: CreateQuizDto) {

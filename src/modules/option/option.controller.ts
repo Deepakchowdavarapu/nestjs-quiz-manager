@@ -69,4 +69,9 @@ export class OptionController {
       request.isCorrect,
     );
   }
+
+  @Get('/:id')
+  async getOptionById(@Param('id') optionId: number) {
+    return await this.optionService.getOptionById(optionId);
+  }
 }

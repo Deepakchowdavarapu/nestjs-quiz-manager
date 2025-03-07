@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuestionRepository } from './question.repository';
 import { Question } from './question.entity';
@@ -16,11 +16,21 @@ export class QuestionService {
     return await this.questionRepository
       .createQueryBuilder('qt')
       .leftJoinAndSelect('qt.options', 'o', 'qt.id = o.questionId')
-      .getMany()
+      .getMany();
   }
 
   async getQuestionById(id: number) {
-    return await this.questionRepository.findOne({ where: { id } });
+    const fullQuestion = await this.questionRepository
+      .createQueryBuilder('qt')
+      .where('qt.id = :id', { id })
+      .leftJoinAndSelect('qt.options', 'o')
+      .getOne();
+
+    if (!fullQuestion) {
+      throw new BadRequestException(`Question with id ${id} not found`);
+    }
+
+    return fullQuestion;
   }
 
   async createQuestion(

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OptionRepository } from './option.repository';
 import { Question } from '../question/question.entity';
@@ -55,5 +59,15 @@ export class OptionService {
       );
     }
     return updatedOption;
+  }
+
+  async getOptionById(optionId: number) {
+    const option = await this.optionRepository.findOne({
+      where: { id: optionId },
+    });
+    if (!option) {
+      throw new BadRequestException(`no option found with ${optionId}`);
+    }
+    return option;
   }
 }
